@@ -27,6 +27,7 @@ exports.register = async (req, res) => {
         email,
         name,
         password: hashedPassword,
+        role: 'USER'
       },
     })
 
@@ -58,7 +59,7 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email ,role: user.role },
       JWT_SECRET,
       { expiresIn: '7d' }
     )
@@ -93,3 +94,38 @@ exports.logout = async (req, res) => {
     return res.status(500).json({ error: 'Erro ao fazer logout.' })
   }
 }
+
+exports.changePassword = async (req, res) => {
+  const userId = req.user.userId; // pegando do token (middleware)
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Senhas são obrigatórias.' });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
+    const validPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Senha atual incorreta.' });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedNewPassword },
+    });
+
+    return res.json({ message: 'Senha alterada com sucesso.' });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Erro ao alterar senha.' });
+  }
+};
