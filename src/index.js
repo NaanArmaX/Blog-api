@@ -11,6 +11,11 @@ app.use(express.json())
 
 const PORT = process.env.BACKEND_PORT || 3000
 
+app.get('/', (req, res) => {
+  res.json({
+    message: 'API rodando! Use o endpoint /api/v1 para acessar a API.'
+  })
+})
 
 const v1Routes = require('./routes/v1')
 app.use('/api/v1', v1Routes)
