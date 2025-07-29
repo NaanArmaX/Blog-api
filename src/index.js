@@ -1,25 +1,21 @@
-require('dotenv').config()
-const express = require('express')
-const cors = require('cors')
-const { PrismaClient } = require('@prisma/client')
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { PrismaClient } = require('@prisma/client');
 
-const app = express()
-const prisma = new PrismaClient()
+const app = express();
+const prisma = new PrismaClient();
 
-app.use(cors())
-app.use(express.json())
-
-const PORT = process.env.BACKEND_PORT || 3000
+app.use(cors());
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.json({
     message: 'API rodando! Use o endpoint /api/v1 para acessar a API.'
-  })
-})
+  });
+});
 
-const v1Routes = require('./routes/v1')
-app.use('/api/v1', v1Routes)
+const v1Routes = require('./routes/v1');
+app.use('/api/v1', v1Routes);
 
-app.listen(PORT, () => {
-  console.log(`API v1 rodando em http://localhost:${PORT}/api/v1`)
-})
+module.exports = app;
